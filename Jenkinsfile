@@ -9,6 +9,10 @@ pipeline {
     triggers {
          pollSCM('* * * * *')
      }
+    
+    tools {
+        maven 'mavenjenkins'
+    }
 
 stages{
         stage('Build'){
