@@ -11,7 +11,7 @@ pipeline {
      }
     
     tools {
-        maven 'mavenjenkins'
+        maven 'jenkins-maven'
     }
 
 stages{
