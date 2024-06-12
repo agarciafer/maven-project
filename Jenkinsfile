@@ -31,13 +31,13 @@ stages{
             parallel{
                 stage ('Deploy to Staging'){
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
+                        sh "scp -o StrictHostKeyChecking=no **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
                     }
                 }
 
                 stage ("Deploy to Production"){
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
+                        sh "scp -o StrictHostKeyChecking=no  **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
                     }
                 }
             }
