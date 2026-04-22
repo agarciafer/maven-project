@@ -1,0 +1,46 @@
+pipeline {
+    agent any // Ejecuta el pipeline en cualquier nodo disponible
+
+    parameters {
+        string(name: 'tomcat_dev', defaultValue: '192.168.33.11', description: 'Staging Server')
+        string(name: 'tomcat_prod', defaultValue: '192.168.33.11', description: 'Production Server')
+    }
+
+    triggers {
+        pollSCM('* * * * *') // Cada minuto
+    }
+
+    tools {
+        maven 'jenkins-maven'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+            post {
+                success {
+                    echo 'Now Archiving...'
+                    archiveArtifacts artifacts: '**/target/*.war'
+                }
+            }
+        }
+
+        stage('Deployments') {
+            parallel {
+                stage('Deploy to Staging') {
+                    steps {
+                        sh "scp **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
+                    }
+                }
+
+                stage('Deploy to Production') {
+                    steps {
+                        sh "scp **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
+                    }
+                }
+            }
+        }
+    }
+}
