@@ -31,13 +31,21 @@ pipeline {
             parallel {
                 stage('Deploy to Staging') {
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
+                        // --- COMANDOS DE DIAGNÓSTICO ---
+                        sh 'whoami'
+                        sh 'hostname'
+                        sh 'ls -la ~/.ssh || echo "No existe la carpeta .ssh"'
+                        // -------------------------------
+                        
+                        // SCP modificado para no pedir confirmación de host
+                        sh "scp -o StrictHostKeyChecking=no **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
                     }
                 }
 
                 stage('Deploy to Production') {
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
+                        // SCP modificado para no pedir confirmación de host
+                        sh "scp -o StrictHostKeyChecking=no **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
                     }
                 }
             }
