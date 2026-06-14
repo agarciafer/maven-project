@@ -21,7 +21,6 @@ pipeline {
             }
             post {
                 success {
-                    echo 'Now Archiving...'
                     archiveArtifacts artifacts: '**/target/*.war'
                 }
             }
@@ -43,13 +42,19 @@ pipeline {
             parallel {
                 stage('Deploy to Staging') {
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
+                        sh """
+                        WAR_FILE=\$(find . -name "*.war" | head -n 1)
+                        scp "\$WAR_FILE" root@${params.tomcat_dev}:/tomcat-staging/webapps/
+                        """
                     }
                 }
 
                 stage('Deploy to Production') {
                     steps {
-                        sh "scp **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
+                        sh """
+                        WAR_FILE=\$(find . -name "*.war" | head -n 1)
+                        scp "\$WAR_FILE" root@${params.tomcat_prod}:/tomcat-prod/webapps/
+                        """
                     }
                 }
             }
