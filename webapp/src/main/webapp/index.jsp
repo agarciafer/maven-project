@@ -50,7 +50,7 @@
 <body>
     <div class="card">
         <h1>🚀 Hello, World RAMA Jenkinsfile</h1>
-        <div class="version">Versión v3</div>
+        <div class="version">Versión v4</div>
         <h2>Viernes 12-06-2026</h2>
         <p class="footer">Curso DevOps CNTG</p>
     </div>
