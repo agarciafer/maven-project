@@ -1,0 +1,84 @@
+pipeline { // Inicio del Jenkins Pipeline Declarativo
+
+    agent any // Ejecuta el pipeline en cualquier agente (nodo) disponible de Jenkins
+
+    parameters { // Define parámetros configurables al lanzar el job
+
+        string(
+            name: 'tomcat_dev', // Nombre del parámetro
+            defaultValue: '192.168.33.11', // Valor por defecto
+            description: 'Staging Server' // Descripción visible en Jenkins
+        )
+
+        string(
+            name: 'tomcat_prod', // Nombre del parámetro
+            defaultValue: '192.168.33.11', // Valor por defecto
+            description: 'Production Server' // Descripción visible en Jenkins
+        )
+    }
+
+    triggers { // Configura disparadores automáticos
+
+        pollSCM('* * * * *') // Comprueba cambios en el repositorio cada minuto
+    }
+
+    tools { // Herramientas que Jenkins debe proporcionar al pipeline
+
+        maven 'jenkins-maven' // Utiliza la instalación Maven llamada "jenkins-maven"
+    }
+
+    stages { // Contenedor de todas las etapas del pipeline
+
+        stage('Build') { // Etapa de compilación de la aplicación
+
+            steps { // Acciones que se ejecutan en esta etapa
+
+                sh 'mvn clean package'
+                // Ejecuta Maven:
+                // clean  -> elimina compilaciones anteriores
+                // package -> compila y genera el fichero WAR
+            }
+
+            post { // Acciones posteriores a la etapa Build
+
+                success { // Solo si la compilación finaliza correctamente
+
+                    echo 'Now Archiving...'
+                    // Muestra un mensaje en la consola de Jenkins
+
+                    archiveArtifacts artifacts: '**/target/*.war'
+                    // Guarda los archivos WAR generados como artefactos del build
+                }
+            }
+        }
+
+        stage('Deployments') { // Etapa de despliegue
+
+            parallel { // Ejecuta varios despliegues al mismo tiempo
+
+                stage('Deploy to Staging') { // Despliegue al entorno de pruebas
+
+                    steps { // Acciones de despliegue
+
+                        sh "scp **/target/*.war root@${params.tomcat_dev}:/tomcat-staging/webapps/"
+                        // Copia el WAR generado al servidor de Staging
+                        // scp = Secure Copy mediante SSH
+                        // ${params.tomcat_dev} toma la IP indicada en el parámetro
+                        // /tomcat-staging/webapps/ es el directorio de despliegue de Tomcat
+                    }
+                }
+
+                stage('Deploy to Production') { // Despliegue al entorno productivo
+
+                    steps { // Acciones de despliegue
+
+                        sh "scp **/target/*.war root@${params.tomcat_prod}:/tomcat-prod/webapps/"
+                        // Copia el WAR generado al servidor de Producción
+                        // ${params.tomcat_prod} toma la IP indicada en el parámetro
+                        // /tomcat-prod/webapps/ es el directorio de despliegue de Tomcat
+                    }
+                }
+            }
+        }
+    }
+} // Fin del pipeline
