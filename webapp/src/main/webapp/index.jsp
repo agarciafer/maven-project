@@ -50,9 +50,9 @@
 <body>
     <div class="card">
         <h1>🚀 Hello, World</h1>
-        <div class="version">Versión v3</div>
+        <div class="version">Versión v4</div>
         <h2>PUE-2026</h2>
-        <p class="footer">Curso DevOps CNTG</p>
+        <p class="footer">Curso DevOps PUE</p>
     </div>
 </body>
 </html>
